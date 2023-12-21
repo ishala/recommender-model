@@ -75,27 +75,29 @@ def predict_rating(user_id, num_places=10):
 
     return result_df
 
-db = mysql.connector.connect(
-    host="localhost",
-    user="root",
-    password="",
-    database="rekomendasi"
-)
+# db = mysql.connector.connect(
+#     host="localhost",
+#     user="root",
+#     password="",
+#     database="rekomendasi"
+# )
+#
+# cursor = db.cursor()
+#
+# #Ambil dataset
+# query1 = 'SELECT * from places_of_all2'
+# query2 = 'SELECT * from reviews'
+#
+# cursor.execute(query1)
+# df_all_places = pd.DataFrame(cursor.fetchall(), columns=cursor.column_names)
+#
+# cursor.execute(query2)
+# df_review = pd.DataFrame(cursor.fetchall(), columns=cursor.column_names)
+# cursor.close()
+# db.close()
 
-cursor = db.cursor()
-
-#Ambil dataset
-query1 = 'SELECT * from places_of_all2'
-query2 = 'SELECT * from reviews'
-
-cursor.execute(query1)
-df_all_places = pd.DataFrame(cursor.fetchall(), columns=cursor.column_names)
-
-cursor.execute(query2)
-df_review = pd.DataFrame(cursor.fetchall(), columns=cursor.column_names)
-cursor.close()
-db.close()
-
+df_all_places = pd.read_csv('dataset/places-of-all2.csv')
+df_review = pd.read_csv('dataset/review-fix.csv')
 
 
 #Menggabungkan kolom
