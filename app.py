@@ -82,7 +82,7 @@ def predict_rating(user_id, num_places, recommendations):
     top_5_places_id = place_list[top_5_ids]
     #ambil 5 nilai rating teratas dari place list
     #Mengalikan dengan rumus min-max lagi agar memiliki nilai yang sama dengan ketika diawal sebelum dilakukan prediksi
-    top_5_places_rating = pred[top_5_ids]*(df_all['rating_review'].max() - df_reviews['rating_review'].min()) + df_reviews['rating_review'].min()
+    top_5_places_rating = pred[top_5_ids]*(df_reviews['rating_review'].max() - df_reviews['rating_review'].min()) + df_reviews['rating_review'].min()
 
     # Mengambil place_id dan nama_tempat dari lima nilai teratas
     top_5_places_info = df_all[df_all['place_id'].isin(top_5_places_id)][['place_id', 'name']].drop_duplicates()
