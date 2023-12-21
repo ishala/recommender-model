@@ -1,5 +1,6 @@
 import numpy as np
 from flask import Flask, request, jsonify, render_template
+import json
 import pandas as pd
 import joblib
 import tensorflow as tf
@@ -13,27 +14,28 @@ recommender_model = joblib.load('models/tfidf_vectorizer.joblib')
 matrix_all = joblib.load('models/tfidf_matrix.joblib')
 rating_model = tf.keras.models.load_model('models/tensorflow_model.h5')
 
-db = mysql.connector.connect(
-    host="localhost",
-    user="root",
-    password="",
-    database="rekomendasi"
-)
+# db = mysql.connector.connect(
+#     host="localhost",
+#     user="root",
+#     password="",
+#     database="rekomendasi"
+# )
+#
+# cursor = db.cursor()
+#
+# #Menggabungkan kolom
+# query1 = 'SELECT place_id, name, merged_address from places_of_all2'
+# query2 = 'SELECT place_id, place_name, rating_review from reviews'
+# cursor.execute(query1)
+#
+# df_all = pd.DataFrame(cursor.fetchall(), columns=cursor.column_names)
+# unique_values = df_all['merged_address'].unique()
+#
+# cursor.execute(query2)
+# df_reviews = pd.DataFrame(cursor.fetchall(), columns=cursor.column_names)
+# cursor.close()
+# db.close()
 
-cursor = db.cursor()
-
-#Menggabungkan kolom
-query1 = 'SELECT place_id, name, merged_address from places_of_all2'
-query2 = 'SELECT place_id, place_name, rating_review from reviews'
-cursor.execute(query1)
-
-df_all = pd.DataFrame(cursor.fetchall(), columns=cursor.column_names)
-unique_values = df_all['merged_address'].unique()
-
-cursor.execute(query2)
-df_reviews = pd.DataFrame(cursor.fetchall(), columns=cursor.column_names)
-cursor.close()
-db.close()
 
 def recommend_top10(daerah, nama_objek, tfidf, tfidf_matrix):
     # Gabungkan daerah dan nama_objek untuk mencari padanan di nilai unik 'merge_name_address'
@@ -51,51 +53,37 @@ def recommend_top10(daerah, nama_objek, tfidf, tfidf_matrix):
     # Ambil top 10 rekomendasi (exluding input_text itself)
     top10_indices = sorted_scores_indices[1:11]
 
-    top10_recommendations = pd.DataFrame({
-        'merged_address': unique_values[top10_indices],
-        'cosine_similarity': similarity_scores[top10_indices]
-    })
 
-    # Cocokkan hasil rekomendasi dengan DataFrame utama
-    result_df = pd.merge(top10_recommendations, df_all[['merged_address', 'place_id']], on='merged_address')
+    return top10_indices
 
-    # Hapus duplikat berdasarkan 'place_id'
-    result_df = result_df.drop_duplicates(subset='place_id')
-
-    return result_df
-
-def predict_rating(user_id, num_places, recommendations):
+def predict_rating(user_id, num_places, id_place_list):
     user_id = user_id
     num_places = num_places
 
-    #Ambil sample sebanyak nilai deklarasi
-    place_list = recommendations['place_id'].values
     #buat array isi user 2
-    user_1 = np.array([user_id for i in range(len(place_list))])
+    user_1 = np.array([user_id for i in range(len(id_place_list))])
 
     #melakukan prediksi
-    pred = rating_model.predict([user_1, place_list]).reshape(num_places)
+    pred = rating_model.predict([user_1, id_place_list]).reshape(num_places)
 
-    #Ambil top 5 nilai id yang diprediksi
-    top_5_ids = (-pred).argsort()[:5]
-    #ambil 5 id teratas dari place list
-    top_5_places_id = place_list[top_5_ids]
+    max_val_rating = 5.0
+    min_val_rating = 1.0
+
+    #Ambil top 10 nilai id yang diprediksi
+    top_10_ids = (-pred).argsort()[:10]
+    #ambil 10 id teratas dari place list
+    top_10_places_id = id_place_list[top_10_ids]
     #ambil 5 nilai rating teratas dari place list
     #Mengalikan dengan rumus min-max lagi agar memiliki nilai yang sama dengan ketika diawal sebelum dilakukan prediksi
-    top_5_places_rating = pred[top_5_ids]*(df_reviews['rating_review'].max() - df_reviews['rating_review'].min()) + df_reviews['rating_review'].min()
+    top_10_places_rating = pred[top_10_ids]*(max_val_rating - min_val_rating) + min_val_rating
 
-    # Mengambil place_id dan nama_tempat dari lima nilai teratas
-    top_5_places_info = df_all[df_all['place_id'].isin(top_5_places_id)][['place_id', 'name']].drop_duplicates()
+    result_dict = {
+    'top_10_places_id': top_10_places_id.tolist(),  # Konversi ke list jika belum
+    'top_10_places_rating': top_10_places_rating.round(1).tolist()  # Konversi ke list jika belum
+    }
 
-    # Membuat DataFrame hasil
-    result_df = pd.DataFrame({
-        'User ID': [user_id] * len(top_5_places_id),
-        'Place ID': top_5_places_id,
-        'Nama Tempat': top_5_places_info['name'].values,
-        'Prediksi Rating': top_5_places_rating.round(1)
-    })
-
-    return result_df
+    json_result = json.dumps(result_dict, ensure_ascii=False)
+    return json_result
 
 
 
