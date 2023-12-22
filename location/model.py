@@ -176,9 +176,9 @@ print(result_df['Nama Tempat'])
 
 #Simpan model
 # Simpan TF-IDF Vectorizer
-joblib.dump(tfidf, 'app/models/tfidf_vectorizer.joblib')
+joblib.dump(tfidf, 'models/tfidf_vectorizer.joblib')
 # Simpan Matrix TF-IDF
-joblib.dump(tfidf_matrix, 'app/models/tfidf_matrix.joblib')
+joblib.dump(tfidf_matrix, 'models/tfidf_matrix.joblib')
 
 #Simpan model Tensorflow
 model.save('models/tensorflow_model.h5')
