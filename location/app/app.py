@@ -64,7 +64,7 @@ def predict_rating(user_id, num_places, id_place_list):
 def Home():
     return {"health_check": "NGENE TO?", "model_version": "OKE?"}
 
-@flask_app.route("/predict", methods=["GET"])
+@flask_app.route("/location-predict", methods=["GET"])
 def predict():
     # Get the value of 'parameters' from the query string
     values_input = request.args.get('daerah', 'object')
