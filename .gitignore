@@ -2,3 +2,5 @@ location/.idea
 location/dataset/
 mbti/.vercel
 mbti/.venv
+mbti/.idea
+.idea
