@@ -88,10 +88,10 @@ def preprocess_text(long_text, tokenizer, max_len):
     return long_text_padded
 
 
+
 @app.route("/")
 def Home():
     return {"health_check": "NGENE TO?", "model_version": "OKE?"}
-
 @app.route("/predict", methods=["GET"])
 def predict():
     # Get the value of 'parameters' from the query string
