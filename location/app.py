@@ -30,12 +30,11 @@ def recommend_top10(daerah, nama_objek, tfidf, tfidf_matrix):
 
     return top10_indices
 
-def predict_rating(user_id, num_places, id_place_list):
-    user_id = user_id
+def predict_rating(mbti, num_places, id_place_list):
     num_places = num_places
 
     #buat array isi user 2
-    user_1 = np.array([user_id for i in range(len(id_place_list))])
+    user_1 = np.array([mbti for i in range(len(id_place_list))])
 
     #melakukan prediksi
     pred = rating_model.predict([user_1, id_place_list]).reshape(num_places)
