@@ -30,8 +30,8 @@ def recommend_top10(daerah, nama_objek, tfidf, tfidf_matrix):
 
     return top10_indices
 
-def predict_rating(mbti, num_places, id_place_list):
-    num_places = num_places
+def predict_rating(user_id, mbti, id_place_list):
+    num_places = 10
 
     #buat array isi user 2
     user_1 = np.array([mbti for i in range(len(id_place_list))])
@@ -51,8 +51,10 @@ def predict_rating(mbti, num_places, id_place_list):
     top_10_places_rating = pred[top_10_ids]*(max_val_rating - min_val_rating) + min_val_rating
 
     result_dict = {
-    'top_10_places_id': top_10_places_id.tolist(),  # Konversi ke list jika belum
-    'top_10_places_rating': top_10_places_rating.round(1).tolist()  # Konversi ke list jika belum
+        'User ID': [user_id] * len(top_10_places_id),
+        'places_id': top_10_places_id.tolist(),  # Konversi ke list jika belum
+        'places_rating': top_10_places_rating.round(1).tolist(),  # Konversi ke list jika belum
+        'mbti_id': [mbti] * len(top_10_places_id)
     }
 
     return result_dict
@@ -69,7 +71,7 @@ def predict():
     values_input = request.args.get('daerah', 'object')
 
     recommendation = recommend_top10(values_input[0], values_input[1], recommender_model, matrix_all)
-    result_df = predict_rating(1, 10, recommendation)
+    result_df = predict_rating(1, 12, recommendation)
 
     print(result_df)
     return jsonify({"top_10": result_df})
