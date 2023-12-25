@@ -93,5 +93,5 @@ def predict():
     print(result_df)
     return jsonify({"top_10": result_df})
 
-if __name__ == "__main__":
-    flask_app.run(debug=True, port=5005)
+# if __name__ == "__main__":
+#     flask_app.run(debug=True, port=5005)
