@@ -60,21 +60,38 @@ def predict_rating(user_id, mbti, id_place_list):
     return result_dict
 
 
+def convert_mbti(result):
+    mbti_dict = {'ENTJ': 1, 'INTJ': 2, 'INFJ': 3, 'ENFJ': 4, 'ESTJ': 5, 'ISTJ': 6,
+                 'ISFJ': 7, 'ESFJ': 8, 'ENTP': 9, 'INTP': 10, 'INFP': 11, 'ENFP': 12,
+                 'ESTP': 13, 'ISTP': 14, 'ISFP': 15, 'ESFP': 16}
+
+    return mbti_dict.get(result, None)
+
 
 @flask_app.route("/")
 def Home():
     return {"health_check": "NGENE TO?", "model_version": "OKE?"}
 
-@flask_app.route("/location-predict", methods=["GET"])
+@flask_app.route("/predict", methods=["GET"])
 def predict():
-    # Get the value of 'parameters' from the query string
-    values_input = request.args.get('daerah', 'object')
+    # Get the values of 'daerah', 'object', 'mbti', and 'user' from the query string
+    daerah = request.args.get('daerah')
+    obj = request.args.get('object')
+    mbti = request.args.get('mbti')
+    user = request.args.get('user')
 
-    recommendation = recommend_top10(values_input[0], values_input[1], recommender_model, matrix_all)
-    result_df = predict_rating(1, 12, recommendation)
+    # Check if any of the required parameters is missing
+    if None in [daerah, obj, mbti, user]:
+        return jsonify({"error": "Missing required parameters"})
+
+    mbti_convert = convert_mbti(mbti)
+
+    print()
+    recommendation = recommend_top10(daerah, obj, recommender_model, matrix_all)
+    result_df = predict_rating(user, mbti_convert, recommendation)
 
     print(result_df)
     return jsonify({"top_10": result_df})
 
-# if __name__ == "__main__":
-#     flask_app.run(debug=True, port=5005)
+if __name__ == "__main__":
+    flask_app.run(debug=True, port=5005)

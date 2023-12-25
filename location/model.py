@@ -46,7 +46,8 @@ def predict_rating(user_id, mbti_labels, num_places=10):
 
     #Ambil sample sebanyak nilai deklarasi
     place_list = recommendations['place_id'].values
-    #buat array isi user 2
+
+    #buat array isi mbti
     user_1 = np.array([mbti_labels for i in range(len(place_list))])
 
     #melakukan prediksi

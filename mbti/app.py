@@ -23,11 +23,12 @@ max_words = 2500  # Assuming you want to consider the top 10,000 words
 max_len = 640  # Assuming you want to limit each comment to 100 words
 def convert_mbti(result):
     return pd.Series([
-        'I' if result[0] == 1 else 'E',  # I/E
-        'N' if result[1] == 1 else 'S',  # N/S
-        'T' if result[2] == 1 else 'F',  # T/F
-        'J' if result[3] == 1 else 'P',  # J/P
+        1 if result[0] == 'I' else 0,  # I/E
+        1 if result[1] == 'N' else 0,  # N/S
+        1 if result[2] == 'T' else 0,  # T/F
+        1 if result[3] == 'J' else 0,  # J/P
     ])
+
 def lemmatize_with_pos(word, pos):
     # Map POS tags to WordNet POS tags
     pos_mapping = {
@@ -97,7 +98,7 @@ def preprocess_text(long_text, tokenizer, max_len):
 @app.route("/")
 def Home():
     return {"health_check": "NGENE TO?", "model_version": "OKE?"}
-@app.route("/mbti-predict", methods=["GET"])
+@app.route("/predict", methods=["GET"])
 def predict():
     # Get the value of 'parameters' from the query string
     values_input = request.args.get('parameters', '')
