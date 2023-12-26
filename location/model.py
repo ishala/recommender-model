@@ -41,20 +41,20 @@ def recommend_top10(daerah, nama_objek):
 
     return result_df
 
-def predict_rating(user_id, mbti_labels, num_places=10):
-    num_places = num_places
+def predict_rating(user_id, mbti_labels, recommendations):
+    #Deklarasi banyak sample random
+    num_places = 10
 
     #Ambil sample sebanyak nilai deklarasi
     place_list = recommendations['place_id'].values
-
-    #buat array isi mbti
+    #buat array isi user 2
     user_1 = np.array([mbti_labels for i in range(len(place_list))])
 
     #melakukan prediksi
     pred = model.predict([user_1, place_list]).reshape(num_places)
 
     #Ambil top 5 nilai id yang diprediksi
-    top_5_ids = (-pred).argsort()[:5]
+    top_5_ids = (-pred).argsort()[:10]
     #ambil 5 id teratas dari place list
     top_5_places_id = place_list[top_5_ids]
     #ambil 5 nilai rating teratas dari place list
@@ -75,37 +75,9 @@ def predict_rating(user_id, mbti_labels, num_places=10):
 
     return result_df
 
-# db = mysql.connector.connect(
-#     host="localhost",
-#     user="root",
-#     password="",
-#     database="rekomendasi"
-# )
-#
-# cursor = db.cursor()
-#
-# #Ambil dataset
-# query1 = 'SELECT * from places_of_all2'
-# query2 = 'SELECT * from reviews'
-#
-# cursor.execute(query1)
-# df_all_places = pd.DataFrame(cursor.fetchall(), columns=cursor.column_names)
-#
-# cursor.execute(query2)
-# df_review = pd.DataFrame(cursor.fetchall(), columns=cursor.column_names)
-# cursor.close()
-# db.close()
-
-df_all_places = pd.read_csv('dataset/places-of-all2.csv')
-df_review = pd.read_csv('dataset/review-fix.csv')
-
-
-#Menggabungkan kolom
-df_review['mbti_labels'] = np.random.randint(1, 17, size=len(df_review))
-
-df_recom = pd.merge(df_all_places, df_review, on='place_id', how='inner')
+df_all_places = pd.read_csv('dataset/new-fix-data.csv')
+df_recom = df_all_places.copy()
 print(df_recom.columns)
-
 #Ambil kolom yang digunakan
 selected_columns = df_recom[['user_id','rating_review','place_id', 'name', 'address_city', 'mbti_labels']]
 
@@ -118,14 +90,6 @@ unique_values = selected_columns['merge_name_address'].unique()
 
 #fit transform matrix unique values
 tfidf_matrix = tfidf.fit_transform(unique_values)
-
-
-#Tes
-daerah_input = "Solo"
-nama_objek_input = "Taman"
-
-recommendations = recommend_top10(daerah_input, nama_objek_input)
-
 
 #GENERATE RATING
 train_data, valid_data = train_test_split(selected_columns, test_size=0.2,random_state=42)
@@ -172,10 +136,15 @@ history = model.fit(x=[train_data['mbti_labels'],train_data['place_id']],
                     callbacks = [callback])
 
 
-#Prediksi rating
-result_df = predict_rating(2, 1, 10)
+#Tes
+daerah_input = "Bantul"
+nama_objek_input = "Pantai"
+recommendations = recommend_top10(daerah_input, nama_objek_input)
+print(recommendations)
 
-print(result_df)
+result_df = predict_rating(2, 12, recommendations)
+
+print(result_df[['Nama Tempat', 'Place ID', 'MBTI']])
 
 #Simpan model
 # Simpan TF-IDF Vectorizer
