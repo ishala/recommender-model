@@ -27,7 +27,7 @@ def recommend_top10(daerah, nama_objek):
     sorted_scores_indices = similarity_scores.argsort()[::-1]
 
     # Ambil top 10 rekomendasi (exluding input_text itself)
-    top10_indices = sorted_scores_indices[1:11]
+    top10_indices = sorted_scores_indices[:10]
     top10_recommendations = pd.DataFrame({
         'merge_name_address': unique_values[top10_indices],
         'cosine_similarity': similarity_scores[top10_indices]
@@ -79,10 +79,10 @@ df_all_places = pd.read_csv('dataset/new-fix-data.csv')
 df_recom = df_all_places.copy()
 print(df_recom.columns)
 #Ambil kolom yang digunakan
-selected_columns = df_recom[['user_id','rating_review','place_id', 'name', 'address_city', 'mbti_labels']]
+selected_columns = df_recom[['user_id','rating_review','place_id', 'name', 'address_city', 'mbti_labels','address_ward','address_state']]
 
 #gabung string daerah dan nama objek wisata
-selected_columns['merge_name_address'] = selected_columns['name'] + ' ' + selected_columns['address_city']
+selected_columns['merge_name_address'] = selected_columns['name'] + ' ' + selected_columns['address_city'] + ' '  + selected_columns['address_state']
 
 #Buat vectorizer
 tfidf = TfidfVectorizer()
@@ -142,9 +142,9 @@ nama_objek_input = "pantai"
 recommendations = recommend_top10(daerah_input, nama_objek_input)
 print(recommendations)
 
-# result_df = predict_rating(2, 12, recommendations)
+result_df = predict_rating(2, 12, recommendations)
 
-# print(result_df[['Nama Tempat', 'Place ID', 'MBTI']])
+print(result_df[['Nama Tempat', 'Place ID', 'MBTI']])
 
 # #Simpan model
 # # Simpan TF-IDF Vectorizer

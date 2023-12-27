@@ -14,10 +14,10 @@ rating_model = tf.keras.models.load_model('models/tensorflow_model.h5')
 df_all_places = pd.read_csv('dataset/new-fix-data.csv')
 df_recom = df_all_places.copy()
 
-selected_columns = df_recom[['user_id','rating_review','place_id', 'name', 'address_city', 'mbti_labels']]
+selected_columns = df_recom[['user_id','rating_review','place_id', 'name', 'address_city', 'mbti_labels','address_state']]
 
 #gabung string daerah dan nama objek wisata
-selected_columns['merge_name_address'] = selected_columns['name'] + ' ' + selected_columns['address_city']
+selected_columns['merge_name_address'] = selected_columns['name'] + ' ' + selected_columns['address_city'] + ' ' + selected_columns['address_state']
 
 unique_values = selected_columns['merge_name_address'].unique()
 
