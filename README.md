@@ -1,5 +1,6 @@
 here is the links of dataset:
 
-- Place Dataset : https://drive.google.com/file/d/1MA-nXktf1wl1PDxyl8xSsPI8h3cWlHjy/view?usp=drive_link
+- Place Dataset : ungu.in/place_datasets
 - Review Dataset : ungu.in/review_dataset
+- Merge place + review : ungu.in/place-review_dataset
 - Mbti Dataset : ungu.in/mbti_dataset
