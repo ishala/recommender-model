@@ -9,7 +9,8 @@ from tensorflow.keras.models import load_model
 from tensorflow.keras.preprocessing.text import Tokenizer
 from tensorflow.keras.preprocessing.sequence import pad_sequences
 import numpy as np
-from nltk.stem import PorterStemmer, WordNetLemmatizer, wordnet
+from nltk.stem import PorterStemmer, WordNetLemmatizer
+from nltk.corpus import wordnet
 
 nltk.download('stopwords')
 nltk.download('punkt')
@@ -23,12 +24,11 @@ max_words = 2500  # Assuming you want to consider the top 10,000 words
 max_len = 640  # Assuming you want to limit each comment to 100 words
 def convert_mbti(result):
     return pd.Series([
-        1 if result[0] == 'I' else 0,  # I/E
-        1 if result[1] == 'N' else 0,  # N/S
-        1 if result[2] == 'T' else 0,  # T/F
-        1 if result[3] == 'J' else 0,  # J/P
+        'I' if result[0] == 1 else 'E',  # I/E
+        'N' if result[1] == 1 else 'S',  # N/S
+        'T' if result[2] == 1 else 'F',  # T/F
+        'J' if result[3] == 1 else 'P',  # J/P
     ])
-
 def lemmatize_with_pos(word, pos):
     # Map POS tags to WordNet POS tags
     pos_mapping = {
@@ -94,10 +94,10 @@ def preprocess_text(long_text, tokenizer, max_len):
     return long_text_padded
 
 
-
 @app.route("/")
 def Home():
     return {"health_check": "NGENE TO?", "model_version": "OKE?"}
+
 @app.route("/predict", methods=["GET"])
 def predict():
     # Get the value of 'parameters' from the query string
@@ -137,3 +137,6 @@ def predict():
     mbti_string = ''.join(mbti_series)
     print(mbti_string)
     return jsonify({"mbti": mbti_string})
+
+if __name__ == "__main__":
+    app.run(debug=True, port=5010)
