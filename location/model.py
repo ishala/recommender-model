@@ -36,7 +36,7 @@ def recommend_top10(daerah, nama_objek):
     # Cocokkan hasil rekomendasi dengan DataFrame utama
     result_df = pd.merge(top10_recommendations, selected_columns[['merge_name_address', 'place_id']], on='merge_name_address')
 
-    # Hapus duplikat berdasarkan 'place_id'
+    # Hapus duplikat berdasarkan D'place_id'
     result_df = result_df.drop_duplicates(subset='place_id')
 
     return result_df
@@ -137,21 +137,21 @@ history = model.fit(x=[train_data['mbti_labels'],train_data['place_id']],
 
 
 #Tes
-daerah_input = "Bantul"
-nama_objek_input = "Pantai"
+daerah_input = "bantul"
+nama_objek_input = "pantai"
 recommendations = recommend_top10(daerah_input, nama_objek_input)
 print(recommendations)
 
-result_df = predict_rating(2, 12, recommendations)
+# result_df = predict_rating(2, 12, recommendations)
 
-print(result_df[['Nama Tempat', 'Place ID', 'MBTI']])
+# print(result_df[['Nama Tempat', 'Place ID', 'MBTI']])
 
-#Simpan model
-# Simpan TF-IDF Vectorizer
-joblib.dump(tfidf, 'models/tfidf_vectorizer.joblib')
-# Simpan Matrix TF-IDF
-joblib.dump(tfidf_matrix, 'models/tfidf_matrix.joblib')
-
-#Simpan model Tensorflow
-model.save('models/tensorflow_model.h5')
+# #Simpan model
+# # Simpan TF-IDF Vectorizer
+# joblib.dump(tfidf, 'models/tfidf_vectorizer.joblib')
+# # Simpan Matrix TF-IDF
+# joblib.dump(tfidf_matrix, 'models/tfidf_matrix.joblib')
+#
+# #Simpan model Tensorflow
+# model.save('models/tensorflow_model.h5')
 

@@ -1,4 +1,5 @@
 import numpy as np
+import pandas as pd
 from flask import Flask, request, jsonify
 import joblib
 import tensorflow as tf
@@ -10,6 +11,15 @@ flask_app = Flask(__name__)
 recommender_model = joblib.load('models/tfidf_vectorizer.joblib')
 matrix_all = joblib.load('models/tfidf_matrix.joblib')
 rating_model = tf.keras.models.load_model('models/tensorflow_model.h5')
+df_all_places = pd.read_csv('dataset/new-fix-data.csv')
+df_recom = df_all_places.copy()
+
+selected_columns = df_recom[['user_id','rating_review','place_id', 'name', 'address_city', 'mbti_labels']]
+
+#gabung string daerah dan nama objek wisata
+selected_columns['merge_name_address'] = selected_columns['name'] + ' ' + selected_columns['address_city']
+
+unique_values = selected_columns['merge_name_address'].unique()
 
 def recommend_top10(daerah, nama_objek, tfidf, tfidf_matrix):
     # Gabungkan daerah dan nama_objek untuk mencari padanan di nilai unik 'merge_name_address'
@@ -26,12 +36,23 @@ def recommend_top10(daerah, nama_objek, tfidf, tfidf_matrix):
 
     # Ambil top 10 rekomendasi (exluding input_text itself)
     top10_indices = sorted_scores_indices[1:11]
+    top10_recommendations = pd.DataFrame({
+        'merge_name_address': unique_values[top10_indices],
+        'cosine_similarity': similarity_scores[top10_indices]
+    })
 
+    # Cocokkan hasil rekomendasi dengan DataFrame utama
+    result_df = pd.merge(top10_recommendations, selected_columns[['merge_name_address', 'place_id']], on='merge_name_address')
 
-    return top10_indices
+    # Hapus duplikat berdasarkan D'place_id'
+    result_df = result_df.drop_duplicates(subset='place_id')
 
-def predict_rating(user_id, mbti, id_place_list):
+    return result_df
+
+def predict_rating(user_id, mbti, recommendations):
     num_places = 10
+
+    id_place_list = recommendations['place_id'].values
 
     #buat array isi user 2
     user_1 = np.array([mbti for i in range(len(id_place_list))])
@@ -49,6 +70,7 @@ def predict_rating(user_id, mbti, id_place_list):
     #ambil 5 nilai rating teratas dari place list
     #Mengalikan dengan rumus min-max lagi agar memiliki nilai yang sama dengan ketika diawal sebelum dilakukan prediksi
     top_10_places_rating = pred[top_10_ids]*(max_val_rating - min_val_rating) + min_val_rating
+
 
     result_dict = {
         'User ID': [user_id] * len(top_10_places_id),
@@ -88,10 +110,11 @@ def predict():
 
     print()
     recommendation = recommend_top10(daerah, obj, recommender_model, matrix_all)
+    print(recommendation)
     result_df = predict_rating(user, mbti_convert, recommendation)
 
     print(result_df)
     return jsonify({"top_10": result_df})
 
-# if __name__ == "__main__":
-#     flask_app.run(debug=True, port=5005)
+if __name__ == "__main__":
+    flask_app.run(debug=True, port=5009)
